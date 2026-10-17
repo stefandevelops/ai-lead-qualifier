@@ -1,0 +1,130 @@
+# Ideal customer profile for the demo seller: Northstar CS.
+# Edit this file (or the ICP page in the UI) to change how leads are scored.
+
+seller:
+  name: Northstar CS
+  product: AI-assisted customer operations platform
+  sender_name: Alex Rivera
+  sender_title: Account Executive
+  sender_email: alex@northstar-cs.example
+
+tiers:
+  hot: 85
+  warm: 55
+
+weights:
+  seniority: 25
+  company_size: 20
+  industry: 20
+  intent: 20
+  geography: 10
+  completeness: 5
+
+seniority:
+  economic_buyer:
+    - ceo
+    - chief executive
+    - cro
+    - chief revenue
+    - cco
+    - chief customer
+    - cfo
+    - chief financial
+    - founder
+    - co-founder
+    - vp
+    - vice president
+    - president
+  champion:
+    - head of
+    - director
+    - director of
+    - revops
+    - revenue operations
+  user:
+    - manager
+    - lead
+    - specialist
+    - coordinator
+    - customer success manager
+    - csm
+  poor_fit:
+    - intern
+    - student
+    - assistant
+    - account executive
+    - sales development
+    - sdr
+    - bdr
+    - business development representative
+
+company_size:
+  ideal_min: 50
+  ideal_max: 2000
+  acceptable_min: 25
+  acceptable_max: 5000
+
+industries:
+  primary:
+    - SaaS
+    - FinTech
+    - Healthcare IT
+    - HR Tech
+  adjacent:
+    - Professional Services
+    - Insurance
+    - EdTech
+    - Healthcare
+    - Logistics
+  poor:
+    - Public Sector
+    - Consumer Retail
+    - Media Agency
+    - Banking
+    - Consulting
+
+geography:
+  core:
+    - US
+    - UK
+    - CA
+    - DE
+    - NL
+    - SE
+    - NO
+    - DK
+    - IE
+    - AU
+  adjacent:
+    - FR
+    - ES
+    - IT
+    - BE
+    - AT
+    - CH
+    - SG
+    - AE
+
+intent:
+  high:
+    - demo
+    - pricing
+    - evaluation
+    - rfp
+    - trial
+    - buying
+    - budget
+    - pilot
+  medium:
+    - webinar
+    - ebook
+    - newsletter
+    - research
+    - content
+    - partner
+  low:
+    - careers
+    - support
+    - unsubscribe
+    - resell
+    - white paper
