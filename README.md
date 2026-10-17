@@ -18,9 +18,13 @@ This demo is the operating rhythm I would give that team on day one: a shared sc
 
 ## Screenshot
 
-The dashboard after the 20 sample leads have been scored. Average score, mix by tier, and the explanation behind the top rows:
+The dashboard after the 20 sample leads have been scored. Average score, mix by tier, and the highest-scoring rows:
 
 ![Dashboard with sample leads scored and grouped by tier](docs/ui-dashboard.png)
+
+A form submit returns the score, the reason, and a first-email draft. Nothing is sent:
+
+![Qualification result with score explanation and draft email](docs/ui-qualification.png)
 
 ## Architecture
 

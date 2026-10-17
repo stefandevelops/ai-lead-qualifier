@@ -49,6 +49,11 @@ def _inject_css() -> None:
     st.markdown(
         """
         <style>
+        html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"],
+        [data-testid="stSidebar"], [data-testid="stMarkdownContainer"], p, h1, h2, h3, h4, span, label, div {
+          font-family: "DejaVu Sans", "Liberation Sans", Arial, Helvetica, sans-serif !important;
+        }
+        [data-testid="stToolbar"], .stAppDeployButton { display: none !important; }
         .block-container { padding-top: 1.4rem; max-width: 1180px; }
         .hero-kicker { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: #5b6b7a; margin-bottom: 0.2rem; }
         .hero-title { font-size: 1.85rem; font-weight: 650; line-height: 1.2; margin: 0 0 0.35rem 0; }
@@ -59,6 +64,11 @@ def _inject_css() -> None:
         .lead-card p { margin: 0.15rem 0; font-size: 0.86rem; color: #3d4a57; }
         .score-pill { display: inline-block; font-weight: 650; font-size: 0.82rem; }
         .muted { color: #5b6b7a; font-size: 0.86rem; }
+        .tier-bar { display: flex; align-items: center; gap: 0.6rem; margin: 0.45rem 0; font-size: 0.92rem; }
+        .tier-bar .label { width: 3.4rem; color: #3d4a57; }
+        .tier-bar .track { flex: 1; background: #efe8dc; border-radius: 999px; height: 12px; overflow: hidden; }
+        .tier-bar .fill { height: 12px; border-radius: 999px; }
+        .tier-bar .count { width: 1.6rem; text-align: right; font-weight: 650; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -102,27 +112,32 @@ def page_dashboard(crm: CRM) -> None:
         st.info("No leads yet. Open Ingest and load the sample list or submit the form.")
         return
 
-    chart = pd.DataFrame(
-        {
-            "Tier": ["Hot", "Warm", "Cold"],
-            "Leads": [
-                stats["by_tier"].get("hot", 0),
-                stats["by_tier"].get("warm", 0),
-                stats["by_tier"].get("cold", 0),
-            ],
-        }
-    )
+    by_tier = stats["by_tier"]
+    total = max(stats["total"], 1)
     left, right = st.columns([1, 2])
     with left:
         st.subheader("Leads by tier")
-        st.bar_chart(chart.set_index("Tier"))
+        bars = [
+            ("Hot", by_tier.get("hot", 0), "#c45c26"),
+            ("Warm", by_tier.get("warm", 0), "#c9a227"),
+            ("Cold", by_tier.get("cold", 0), "#5b6b7a"),
+        ]
+        markup = []
+        for label, count, color in bars:
+            width = max(4, int(round(100 * count / total)))
+            markup.append(
+                f'<div class="tier-bar"><span class="label">{label}</span>'
+                f'<div class="track"><div class="fill" style="width:{width}%;background:{color};"></div></div>'
+                f'<span class="count">{count}</span></div>'
+            )
+        st.markdown("".join(markup), unsafe_allow_html=True)
     with right:
         st.subheader("Highest-scoring leads")
         preview = pd.DataFrame(rows)[
             ["first_name", "last_name", "company", "title", "score", "tier", "intent_level"]
         ].head(8)
         preview.columns = ["First", "Last", "Company", "Title", "Score", "Tier", "Intent"]
-        st.dataframe(preview, hide_index=True, use_container_width=True)
+        st.table(preview)
 
     st.subheader("What the scores are saying")
     for row in rows[:3]:
@@ -171,6 +186,11 @@ def _show_qualification(result) -> None:
 def page_ingest(crm: CRM, icp) -> None:
     st.subheader("Bring a lead in")
     st.caption("Use the 20 fake sample leads, upload a CSV, or type one by hand. Re-submitting the same email updates the CRM row.")
+
+    if "last_result" in st.session_state:
+        st.markdown("##### Latest qualification")
+        _show_qualification(st.session_state["last_result"])
+        st.divider()
 
     sample_tab, csv_tab, form_tab = st.tabs(["Sample leads", "CSV upload", "Web form"])
 
@@ -234,11 +254,7 @@ def page_ingest(crm: CRM, icp) -> None:
                 result, _ = qualify_and_log(lead, icp, crm, prefer_llm=bool(detect_llm()))
                 st.session_state["last_result"] = result
                 st.success("Scored, drafted, and written to the CRM.")
-
-    if "last_result" in st.session_state:
-        st.divider()
-        st.subheader("Latest qualification")
-        _show_qualification(st.session_state["last_result"])
+                st.rerun()
 
 
 def page_pipeline(crm: CRM) -> None:
